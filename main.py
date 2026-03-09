@@ -1,49 +1,27 @@
 import os
-import requests
 import google.generativeai as genai
-from datetime import datetime
 
-# 1. API 설정 (GitHub Secrets에서 불러옴)
-genai.configure(api_key=os.environ["AIzaSyAGkaTuK1gNA5crWDCLuotAVVlcuVqVbB8"])
-model = genai.GenerativeModel('gemini-1.5-flash')
+# 1. API 키 확인 (연료 체크)
+api_key = os.environ.get("AIzaSyAGkaTuK1gNA5crWDCLuotAVVlcuVqVbB8")
 
-class NexusEngine:
-    def __init__(self):
-        # 6개 국어 설정 (영, 중, 일, 서, 불, 한)
-        self.langs = {
-            "EN": "English", "CN": "Chinese", "JP": "Japanese", 
-            "ES": "Spanish", "FR": "French", "KR": "Korean"
-        }
-        self.data_summary = ""
+if not api_key:
+    print("❌ 에러: API 키가 설정되지 않았습니다! Settings > Secrets를 확인하세요.")
+    exit(1)
 
-    def collect(self):
-        print("데이터 수집 중...")
-        # HuggingFace 트렌딩 데이터 샘플 수집
-        try:
-            res = requests.get("https://huggingface.co/api/trending?type=model").json()
-            self.data_summary = f"Current Tech Trends: {res[:3]}"
-        except:
-            self.data_summary = "No new data found, analyzing general market trends."
+try:
+    # 2. AI 엔진 설정
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-1.5-flash')
 
-    def generate(self):
-        self.collect()
-        for code, name in self.langs.items():
-            print(f"{name} 리포트 생성 중...")
-            prompt = f"""
-            You are a $10M global tech strategist. 
-            Analyze this data and write a high-value business report in {name}:
-            {self.data_summary}
-            Include: Business Opportunity, Technical Guide, and SEO Keywords.
-            """
-            response = model.generate_content(prompt)
-            
-            # 폴더 구조화 및 파일 저장
-            path = f"content/{code.lower()}"
-            os.makedirs(path, exist_ok=True)
-            filename = f"{path}/{datetime.now().strftime('%Y-%m-%d')}.md"
-            with open(filename, "w", encoding="utf-8") as f:
-                f.write(response.text)
-        print("모든 리포트 생성 완료!")
+    # 3. 테스트 실행
+    response = model.generate_content("Hello, say 'Success!' in Korean.")
+    print(f"✅ AI 응답 성공: {response.text}")
 
-if __name__ == "__main__":
-    NexusEngine().generate()
+    # 4. 결과 저장용 폴더 만들기
+    os.makedirs("content", exist_ok=True)
+    with open("content/test.txt", "w", encoding="utf-8") as f:
+        f.write(f"AI가 생성한 메시지: {response.text}")
+
+except Exception as e:
+    print(f"❌ 실행 중 에러 발생: {e}")
+    exit(1)
