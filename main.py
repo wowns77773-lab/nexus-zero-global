@@ -4,7 +4,7 @@ import google.generativeai as genai
 from datetime import datetime
 
 # 1. API 설정 (GitHub Secrets에서 불러옴)
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+genai.configure(api_key=os.environ["AIzaSyAGkaTuK1gNA5crWDCLuotAVVlcuVqVbB8"])
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 class NexusEngine:
